@@ -44,49 +44,57 @@ const monsters = [
 const locations = [
   {
     name: "town square",
-    "button text": ["Go to store", "Go to cave", "Fight dragon"],
+    "button text": ["Go to store", "Go to cave", "Search for a dragon"],
+    "button titles": ["To buy health or weapon", "To fight slimes or fanged beasts", "To try and kill the monster"],
     "button functions": [goStore, goCave, fightDragon],
     text: "You are in the town square. You see a sign that says \"Store\"."
   },
   {
     name: "store",
-    "button text": ["Buy 10 health (10 gold)", "Buy weapon (30 gold)", "Go to town square"],
+    "button text": ["Buy 10 health (10 gold)", "Buy weapon (30 gold)", "Exit store"],
+    "button titles": ["Hold Shift to buy 100 health", "It will be added to your inventory", "To the town square"],
     "button functions": [buyHealth, buyWeapon, goTown],
     text: "You enter the store."
   },
   {
     name: "cave",
     "button text": ["Fight slime", "Fight fanged beast", "Go to town square"],
+    "button titles": ["It should be easy", "Risky? We'll see", "Rest, heal, trade"],
     "button functions": [fightSlime, fightBeast, goTown],
     text: "You enter the cave. You see some monsters."
   },
   {
     name: "fight",
     "button text": ["Attack", "Dodge", "Run"],
+    "button titles": ["Strike it with your " + weapons[currentWeapon].name, "Try to avoid the attack", "Escape to the town"],
     "button functions": [attack, dodge, goTown],
     text: "You are fighting a monster."
   },
   {
     name: "kill monster",
-    "button text": ["Go to town square", "Go to town square", "Go to town square"],
-    "button functions": [goTown, goTown, easterEgg],
+    "button text": ["Stay in the cave", "Go to town square", "Pray for more"],
+    "button titles": ["Explore the cave", "Rest, heal, trade", "Address the god of numbers"],
+    "button functions": [goCave, goTown, easterEgg],
     text: 'The monster screams "Arg!" as it dies. You gain experience points and find gold.'
   },
   {
     name: "lose",
     "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+    "button titles": ["Start again", "Start new game", "New story"],
     "button functions": [restart, restart, restart],
     text: "You die. &#x2620;"
   },
   {
     name: "win",
     "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+    "button titles": ["", "", ""],
     "button functions": [restart, restart, restart],
     text: "You defeat the dragon! YOU WIN THE GAME! &#x1F389;"
   },
   {
     name: "easter egg",
     "button text": ["2", "8", "Go to town square?"],
+    "button titles": ["", "", ""],
     "button functions": [pickTwo, pickEight, goTown],
     text: "You find a secret game. Pick a number above. Ten numbers will be randomly chosen between 0 and 10. If the number you choose matches one of the random numbers, you win!"
   }
@@ -97,11 +105,18 @@ button1.onclick = goStore;
 button2.onclick = goCave;
 button3.onclick = fightDragon;
 
+goTown();
+
+text.innerText = "Welcome to Dragon Repeller. You must defeat the dragon that is preventing people from leaving the town. You are in the town square. Where do you want to go? Use the buttons above."
+
 function update(location) {
   monsterStats.style.display = "none";
   button1.innerText = location["button text"][0];
   button2.innerText = location["button text"][1];
   button3.innerText = location["button text"][2];
+  button1.title = location["button titles"][0];
+  button2.title = location["button titles"][1];
+  button3.title = location["button titles"][2];
   button1.onclick = location["button functions"][0];
   button2.onclick = location["button functions"][1];
   button3.onclick = location["button functions"][2];
@@ -120,8 +135,13 @@ function goCave() {
   update(locations[2]);
 }
 
-function buyHealth() {
-  if (gold >= 10) {
+function buyHealth(e) {
+  if (e.shiftKey && gold >= 100) {
+    gold -= 100;
+    health += 100;
+    goldText.innerText = gold;
+    healthText.innerText = health;
+  } else if (gold >= 10) {
     gold -= 10;
     health += 10;
     goldText.innerText = gold;
@@ -142,7 +162,7 @@ function buyWeapon() {
 
       text.innerText = "You now have a " + newWeapon + ".";
       inventory.push(newWeapon);
-      text.innerText += " In your inventory you have: " + inventory;
+      text.innerText += " In your inventory you have: " + inventory.join(', ') + ".";
     } else {
       text.innerText = "You do not have enough gold to buy a weapon.";
     }
@@ -161,7 +181,7 @@ function sellWeapon() {
     let currentWeapon = inventory.shift();
 
     text.innerText = "You sold a " + currentWeapon + ".";
-    text.innerText += " In your inventory you have: " + inventory.join(', ');
+    text.innerText += " In your inventory you have: " + inventory.join(', ') + ".";
   } else {
     text.innerText = "Don't sell your only weapon!";
   }
